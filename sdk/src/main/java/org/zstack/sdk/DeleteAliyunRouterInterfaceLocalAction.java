@@ -3,7 +3,7 @@ package org.zstack.sdk;
 import java.util.HashMap;
 import java.util.Map;
 
-public class DeleteRouterInterfaceRemoteAction extends AbstractAction {
+public class DeleteAliyunRouterInterfaceLocalAction extends AbstractAction {
 
     private static final HashMap<String, Parameter> parameterMap = new HashMap<>();
 
@@ -11,7 +11,7 @@ public class DeleteRouterInterfaceRemoteAction extends AbstractAction {
 
     public static class Result {
         public ErrorCode error;
-        public DeleteRouterInterfaceRemoteResult value;
+        public DeleteAliyunRouterInterfaceLocalResult value;
 
         public Result throwExceptionIfError() {
             if (error != null) {
@@ -26,9 +26,6 @@ public class DeleteRouterInterfaceRemoteAction extends AbstractAction {
 
     @Param(required = true, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
     public java.lang.String uuid;
-
-    @Param(required = true, validValues = {"vrouter","vbr"}, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String vRouterType;
 
     @Param(required = false)
     public java.lang.String deleteMode = "Permissive";
@@ -56,8 +53,8 @@ public class DeleteRouterInterfaceRemoteAction extends AbstractAction {
             return ret;
         }
         
-        DeleteRouterInterfaceRemoteResult value = res.getResult(DeleteRouterInterfaceRemoteResult.class);
-        ret.value = value == null ? new DeleteRouterInterfaceRemoteResult() : value; 
+        DeleteAliyunRouterInterfaceLocalResult value = res.getResult(DeleteAliyunRouterInterfaceLocalResult.class);
+        ret.value = value == null ? new DeleteAliyunRouterInterfaceLocalResult() : value; 
 
         return ret;
     }
@@ -87,7 +84,7 @@ public class DeleteRouterInterfaceRemoteAction extends AbstractAction {
     RestInfo getRestInfo() {
         RestInfo info = new RestInfo();
         info.httpMethod = "DELETE";
-        info.path = "/hybrid/aliyun/router-interface/remote/{uuid}";
+        info.path = "/hybrid/aliyun/router-interface/{uuid}";
         info.needSession = true;
         info.needPoll = true;
         info.parameterName = "";

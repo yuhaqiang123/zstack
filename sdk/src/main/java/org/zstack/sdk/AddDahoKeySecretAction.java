@@ -3,7 +3,7 @@ package org.zstack.sdk;
 import java.util.HashMap;
 import java.util.Map;
 
-public class QueryEcsImageFromLocalAction extends QueryAction {
+public class AddDahoKeySecretAction extends AbstractAction {
 
     private static final HashMap<String, Parameter> parameterMap = new HashMap<>();
 
@@ -11,7 +11,7 @@ public class QueryEcsImageFromLocalAction extends QueryAction {
 
     public static class Result {
         public ErrorCode error;
-        public QueryEcsImageFromLocalResult value;
+        public AddDahoKeySecretResult value;
 
         public Result throwExceptionIfError() {
             if (error != null) {
@@ -24,6 +24,38 @@ public class QueryEcsImageFromLocalAction extends QueryAction {
         }
     }
 
+    @Param(required = true, nonempty = false, nullElements = false, emptyString = false, noTrim = false)
+    public java.lang.String name;
+
+    @Param(required = true, nonempty = false, nullElements = false, emptyString = false, noTrim = false)
+    public java.lang.String key;
+
+    @Param(required = true, nonempty = false, nullElements = false, emptyString = false, noTrim = false)
+    public java.lang.String secret;
+
+    @Param(required = false, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
+    public java.lang.String accountUuid;
+
+    @Param(required = false, maxLength = 1024, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
+    public java.lang.String description;
+
+    @Param(required = false)
+    public java.lang.String resourceUuid;
+
+    @Param(required = false)
+    public java.util.List systemTags;
+
+    @Param(required = false)
+    public java.util.List userTags;
+
+    @Param(required = true)
+    public String sessionId;
+
+    @NonAPIParam
+    public long timeout = -1;
+
+    @NonAPIParam
+    public long pollingInterval = -1;
 
 
     private Result makeResult(ApiResult res) {
@@ -33,8 +65,8 @@ public class QueryEcsImageFromLocalAction extends QueryAction {
             return ret;
         }
         
-        QueryEcsImageFromLocalResult value = res.getResult(QueryEcsImageFromLocalResult.class);
-        ret.value = value == null ? new QueryEcsImageFromLocalResult() : value; 
+        AddDahoKeySecretResult value = res.getResult(AddDahoKeySecretResult.class);
+        ret.value = value == null ? new AddDahoKeySecretResult() : value; 
 
         return ret;
     }
@@ -63,11 +95,11 @@ public class QueryEcsImageFromLocalAction extends QueryAction {
 
     RestInfo getRestInfo() {
         RestInfo info = new RestInfo();
-        info.httpMethod = "GET";
-        info.path = "/hybrid/aliyun/image";
+        info.httpMethod = "POST";
+        info.path = "/hybrid/daho/account";
         info.needSession = true;
-        info.needPoll = false;
-        info.parameterName = "";
+        info.needPoll = true;
+        info.parameterName = "params";
         return info;
     }
 

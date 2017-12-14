@@ -3,7 +3,7 @@ package org.zstack.sdk;
 import java.util.HashMap;
 import java.util.Map;
 
-public class DeleteRouterInterfaceLocalAction extends AbstractAction {
+public class DetachDahoKeySecretAction extends AbstractAction {
 
     private static final HashMap<String, Parameter> parameterMap = new HashMap<>();
 
@@ -11,7 +11,7 @@ public class DeleteRouterInterfaceLocalAction extends AbstractAction {
 
     public static class Result {
         public ErrorCode error;
-        public DeleteRouterInterfaceLocalResult value;
+        public DetachDahoKeySecretResult value;
 
         public Result throwExceptionIfError() {
             if (error != null) {
@@ -26,9 +26,6 @@ public class DeleteRouterInterfaceLocalAction extends AbstractAction {
 
     @Param(required = true, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
     public java.lang.String uuid;
-
-    @Param(required = false)
-    public java.lang.String deleteMode = "Permissive";
 
     @Param(required = false)
     public java.util.List systemTags;
@@ -53,8 +50,8 @@ public class DeleteRouterInterfaceLocalAction extends AbstractAction {
             return ret;
         }
         
-        DeleteRouterInterfaceLocalResult value = res.getResult(DeleteRouterInterfaceLocalResult.class);
-        ret.value = value == null ? new DeleteRouterInterfaceLocalResult() : value; 
+        DetachDahoKeySecretResult value = res.getResult(DetachDahoKeySecretResult.class);
+        ret.value = value == null ? new DetachDahoKeySecretResult() : value; 
 
         return ret;
     }
@@ -83,11 +80,11 @@ public class DeleteRouterInterfaceLocalAction extends AbstractAction {
 
     RestInfo getRestInfo() {
         RestInfo info = new RestInfo();
-        info.httpMethod = "DELETE";
-        info.path = "/hybrid/aliyun/router-interface/{uuid}";
+        info.httpMethod = "PUT";
+        info.path = "/hybrid/daho/key/{uuid}/detach";
         info.needSession = true;
         info.needPoll = true;
-        info.parameterName = "";
+        info.parameterName = "detachDahoKeySecret";
         return info;
     }
 

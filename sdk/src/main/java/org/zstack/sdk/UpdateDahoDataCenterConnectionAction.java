@@ -3,7 +3,7 @@ package org.zstack.sdk;
 import java.util.HashMap;
 import java.util.Map;
 
-public class UpdateRouteInterfaceRemoteAction extends AbstractAction {
+public class UpdateDahoDataCenterConnectionAction extends AbstractAction {
 
     private static final HashMap<String, Parameter> parameterMap = new HashMap<>();
 
@@ -11,7 +11,7 @@ public class UpdateRouteInterfaceRemoteAction extends AbstractAction {
 
     public static class Result {
         public ErrorCode error;
-        public UpdateRouteInterfaceRemoteResult value;
+        public UpdateDahoDataCenterConnectionResult value;
 
         public Result throwExceptionIfError() {
             if (error != null) {
@@ -27,11 +27,8 @@ public class UpdateRouteInterfaceRemoteAction extends AbstractAction {
     @Param(required = true, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
     public java.lang.String uuid;
 
-    @Param(required = true, validValues = {"active","inactive"}, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String op;
-
-    @Param(required = true, validValues = {"vbr","vrouter"}, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String vRouterType;
+    @Param(required = false, maxLength = 1024, nonempty = false, nullElements = false, emptyString = false, noTrim = false)
+    public java.lang.String description;
 
     @Param(required = false)
     public java.util.List systemTags;
@@ -56,8 +53,8 @@ public class UpdateRouteInterfaceRemoteAction extends AbstractAction {
             return ret;
         }
         
-        UpdateRouteInterfaceRemoteResult value = res.getResult(UpdateRouteInterfaceRemoteResult.class);
-        ret.value = value == null ? new UpdateRouteInterfaceRemoteResult() : value; 
+        UpdateDahoDataCenterConnectionResult value = res.getResult(UpdateDahoDataCenterConnectionResult.class);
+        ret.value = value == null ? new UpdateDahoDataCenterConnectionResult() : value; 
 
         return ret;
     }
@@ -87,10 +84,10 @@ public class UpdateRouteInterfaceRemoteAction extends AbstractAction {
     RestInfo getRestInfo() {
         RestInfo info = new RestInfo();
         info.httpMethod = "PUT";
-        info.path = "/hybrid/aliyun/router-interface/{uuid}/actions";
+        info.path = "/hybrid/daho/connections/{uuid}/actions";
         info.needSession = true;
         info.needPoll = true;
-        info.parameterName = "updateRouteInterfaceRemote";
+        info.parameterName = "updateDahoDataCenterConnection";
         return info;
     }
 
