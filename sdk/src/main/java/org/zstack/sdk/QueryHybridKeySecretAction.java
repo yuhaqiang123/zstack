@@ -3,7 +3,7 @@ package org.zstack.sdk;
 import java.util.HashMap;
 import java.util.Map;
 
-public class DetachDahoKeySecretAction extends AbstractAction {
+public class QueryHybridKeySecretAction extends QueryAction {
 
     private static final HashMap<String, Parameter> parameterMap = new HashMap<>();
 
@@ -11,7 +11,7 @@ public class DetachDahoKeySecretAction extends AbstractAction {
 
     public static class Result {
         public ErrorCode error;
-        public DetachDahoKeySecretResult value;
+        public QueryHybridKeySecretResult value;
 
         public Result throwExceptionIfError() {
             if (error != null) {
@@ -24,23 +24,6 @@ public class DetachDahoKeySecretAction extends AbstractAction {
         }
     }
 
-    @Param(required = true, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String uuid;
-
-    @Param(required = false)
-    public java.util.List systemTags;
-
-    @Param(required = false)
-    public java.util.List userTags;
-
-    @Param(required = true)
-    public String sessionId;
-
-    @NonAPIParam
-    public long timeout = -1;
-
-    @NonAPIParam
-    public long pollingInterval = -1;
 
 
     private Result makeResult(ApiResult res) {
@@ -50,8 +33,8 @@ public class DetachDahoKeySecretAction extends AbstractAction {
             return ret;
         }
         
-        DetachDahoKeySecretResult value = res.getResult(DetachDahoKeySecretResult.class);
-        ret.value = value == null ? new DetachDahoKeySecretResult() : value; 
+        QueryHybridKeySecretResult value = res.getResult(QueryHybridKeySecretResult.class);
+        ret.value = value == null ? new QueryHybridKeySecretResult() : value; 
 
         return ret;
     }
@@ -80,11 +63,11 @@ public class DetachDahoKeySecretAction extends AbstractAction {
 
     RestInfo getRestInfo() {
         RestInfo info = new RestInfo();
-        info.httpMethod = "PUT";
-        info.path = "/hybrid/daho/key/{uuid}/detach";
+        info.httpMethod = "GET";
+        info.path = "/hybrid/hybrid/key";
         info.needSession = true;
-        info.needPoll = true;
-        info.parameterName = "detachDahoKeySecret";
+        info.needPoll = false;
+        info.parameterName = "";
         return info;
     }
 

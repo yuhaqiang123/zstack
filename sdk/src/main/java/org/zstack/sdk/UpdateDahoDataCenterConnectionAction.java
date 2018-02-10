@@ -27,6 +27,9 @@ public class UpdateDahoDataCenterConnectionAction extends AbstractAction {
     @Param(required = true, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
     public java.lang.String uuid;
 
+    @Param(required = false, maxLength = 255, nonempty = false, nullElements = false, emptyString = false, noTrim = false)
+    public java.lang.String name;
+
     @Param(required = false, maxLength = 1024, nonempty = false, nullElements = false, emptyString = false, noTrim = false)
     public java.lang.String description;
 

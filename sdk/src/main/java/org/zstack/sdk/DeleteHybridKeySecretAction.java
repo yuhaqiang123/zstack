@@ -3,7 +3,7 @@ package org.zstack.sdk;
 import java.util.HashMap;
 import java.util.Map;
 
-public class QueryDahoKeySecretAction extends QueryAction {
+public class DeleteHybridKeySecretAction extends AbstractAction {
 
     private static final HashMap<String, Parameter> parameterMap = new HashMap<>();
 
@@ -11,7 +11,7 @@ public class QueryDahoKeySecretAction extends QueryAction {
 
     public static class Result {
         public ErrorCode error;
-        public QueryDahoKeySecretResult value;
+        public DeleteHybridKeySecretResult value;
 
         public Result throwExceptionIfError() {
             if (error != null) {
@@ -24,6 +24,26 @@ public class QueryDahoKeySecretAction extends QueryAction {
         }
     }
 
+    @Param(required = true, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
+    public java.lang.String uuid;
+
+    @Param(required = false)
+    public java.lang.String deleteMode = "Permissive";
+
+    @Param(required = false)
+    public java.util.List systemTags;
+
+    @Param(required = false)
+    public java.util.List userTags;
+
+    @Param(required = true)
+    public String sessionId;
+
+    @NonAPIParam
+    public long timeout = -1;
+
+    @NonAPIParam
+    public long pollingInterval = -1;
 
 
     private Result makeResult(ApiResult res) {
@@ -33,8 +53,8 @@ public class QueryDahoKeySecretAction extends QueryAction {
             return ret;
         }
         
-        QueryDahoKeySecretResult value = res.getResult(QueryDahoKeySecretResult.class);
-        ret.value = value == null ? new QueryDahoKeySecretResult() : value; 
+        DeleteHybridKeySecretResult value = res.getResult(DeleteHybridKeySecretResult.class);
+        ret.value = value == null ? new DeleteHybridKeySecretResult() : value; 
 
         return ret;
     }
@@ -63,10 +83,10 @@ public class QueryDahoKeySecretAction extends QueryAction {
 
     RestInfo getRestInfo() {
         RestInfo info = new RestInfo();
-        info.httpMethod = "GET";
-        info.path = "/hybrid/daho/key";
+        info.httpMethod = "DELETE";
+        info.path = "/hybrid/hybrid/key/{uuid}";
         info.needSession = true;
-        info.needPoll = false;
+        info.needPoll = true;
         info.parameterName = "";
         return info;
     }

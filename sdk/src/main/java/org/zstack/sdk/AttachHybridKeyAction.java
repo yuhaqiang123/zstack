@@ -3,7 +3,7 @@ package org.zstack.sdk;
 import java.util.HashMap;
 import java.util.Map;
 
-public class DeleteDahoKeySecretAction extends AbstractAction {
+public class AttachHybridKeyAction extends AbstractAction {
 
     private static final HashMap<String, Parameter> parameterMap = new HashMap<>();
 
@@ -11,7 +11,7 @@ public class DeleteDahoKeySecretAction extends AbstractAction {
 
     public static class Result {
         public ErrorCode error;
-        public DeleteDahoKeySecretResult value;
+        public AttachHybridKeyResult value;
 
         public Result throwExceptionIfError() {
             if (error != null) {
@@ -26,9 +26,6 @@ public class DeleteDahoKeySecretAction extends AbstractAction {
 
     @Param(required = true, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
     public java.lang.String uuid;
-
-    @Param(required = false)
-    public java.lang.String deleteMode = "Permissive";
 
     @Param(required = false)
     public java.util.List systemTags;
@@ -53,8 +50,8 @@ public class DeleteDahoKeySecretAction extends AbstractAction {
             return ret;
         }
         
-        DeleteDahoKeySecretResult value = res.getResult(DeleteDahoKeySecretResult.class);
-        ret.value = value == null ? new DeleteDahoKeySecretResult() : value; 
+        AttachHybridKeyResult value = res.getResult(AttachHybridKeyResult.class);
+        ret.value = value == null ? new AttachHybridKeyResult() : value; 
 
         return ret;
     }
@@ -83,11 +80,11 @@ public class DeleteDahoKeySecretAction extends AbstractAction {
 
     RestInfo getRestInfo() {
         RestInfo info = new RestInfo();
-        info.httpMethod = "DELETE";
-        info.path = "/hybrid/daho/key/{uuid}";
+        info.httpMethod = "PUT";
+        info.path = "/hybrid/hybrid/key/{uuid}/attach";
         info.needSession = true;
         info.needPoll = true;
-        info.parameterName = "";
+        info.parameterName = "attachHybridKey";
         return info;
     }
 

@@ -3,7 +3,7 @@ package org.zstack.sdk;
 import java.util.HashMap;
 import java.util.Map;
 
-public class AddDahoKeySecretAction extends AbstractAction {
+public class DetachHybridKeyAction extends AbstractAction {
 
     private static final HashMap<String, Parameter> parameterMap = new HashMap<>();
 
@@ -11,7 +11,7 @@ public class AddDahoKeySecretAction extends AbstractAction {
 
     public static class Result {
         public ErrorCode error;
-        public AddDahoKeySecretResult value;
+        public DetachHybridKeyResult value;
 
         public Result throwExceptionIfError() {
             if (error != null) {
@@ -24,23 +24,8 @@ public class AddDahoKeySecretAction extends AbstractAction {
         }
     }
 
-    @Param(required = true, nonempty = false, nullElements = false, emptyString = false, noTrim = false)
-    public java.lang.String name;
-
-    @Param(required = true, nonempty = false, nullElements = false, emptyString = false, noTrim = false)
-    public java.lang.String key;
-
-    @Param(required = true, nonempty = false, nullElements = false, emptyString = false, noTrim = false)
-    public java.lang.String secret;
-
-    @Param(required = false, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String accountUuid;
-
-    @Param(required = false, maxLength = 1024, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String description;
-
-    @Param(required = false)
-    public java.lang.String resourceUuid;
+    @Param(required = true, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
+    public java.lang.String uuid;
 
     @Param(required = false)
     public java.util.List systemTags;
@@ -65,8 +50,8 @@ public class AddDahoKeySecretAction extends AbstractAction {
             return ret;
         }
         
-        AddDahoKeySecretResult value = res.getResult(AddDahoKeySecretResult.class);
-        ret.value = value == null ? new AddDahoKeySecretResult() : value; 
+        DetachHybridKeyResult value = res.getResult(DetachHybridKeyResult.class);
+        ret.value = value == null ? new DetachHybridKeyResult() : value; 
 
         return ret;
     }
@@ -95,11 +80,11 @@ public class AddDahoKeySecretAction extends AbstractAction {
 
     RestInfo getRestInfo() {
         RestInfo info = new RestInfo();
-        info.httpMethod = "POST";
-        info.path = "/hybrid/daho/account";
+        info.httpMethod = "PUT";
+        info.path = "/hybrid/hybrid/key/{uuid}/detach";
         info.needSession = true;
         info.needPoll = true;
-        info.parameterName = "params";
+        info.parameterName = "detachHybridKey";
         return info;
     }
 

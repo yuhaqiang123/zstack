@@ -1,6 +1,6 @@
 package org.zstack.sdk;
 
-public class QueryDahoKeySecretResult {
+public class QueryHybridKeySecretResult {
     public java.util.List<HybridAccountInventory> inventories;
     public void setInventories(java.util.List<HybridAccountInventory> inventories) {
         this.inventories = inventories;
