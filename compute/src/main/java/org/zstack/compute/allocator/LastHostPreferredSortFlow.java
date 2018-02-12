@@ -15,12 +15,10 @@ import java.util.Optional;
  */
 @Configurable(preConstruction = true, autowire = Autowire.BY_TYPE)
 public class LastHostPreferredSortFlow extends AbstractHostSortorFlow {
+    private boolean skip = true;
+
     @Override
     public void sort() {
-        if (spec.isListAllHosts()) {
-            return;
-        }
-
         final VmInstanceInventory vm = spec.getVmInstance();
         Optional<HostInventory> hosts = candidates.stream().filter(candidate -> candidate.getUuid().equals(vm.getLastHostUuid())).findAny();
         List<HostInventory> sorted = new ArrayList<>();
@@ -37,5 +35,10 @@ public class LastHostPreferredSortFlow extends AbstractHostSortorFlow {
             skip = false;
             subCandidates.addAll(candidates);
         }
+    }
+
+    @Override
+    public boolean skipNext() {
+        return skip;
     }
 }

@@ -27,6 +27,7 @@ import org.zstack.header.network.l2.L2NetworkVO_;
 import org.zstack.header.network.l3.*;
 import org.zstack.header.quota.QuotaConstant;
 import org.zstack.identity.AccountManager;
+import org.zstack.identity.QuotaGlobalConfig;
 import org.zstack.identity.QuotaUtil;
 import org.zstack.network.service.MtuGetter;
 import org.zstack.network.service.NetworkServiceSystemTag;
@@ -43,7 +44,6 @@ import javax.persistence.Tuple;
 import javax.persistence.TypedQuery;
 import java.util.*;
 import java.util.concurrent.Callable;
-import java.util.stream.Collectors;
 
 import static org.zstack.utils.CollectionDSL.list;
 import static org.zstack.utils.CollectionDSL.map;
@@ -70,6 +70,7 @@ public class L3NetworkManagerImpl extends AbstractService implements L3NetworkMa
 
     private Map<String, L3NetworkFactory> l3NetworkFactories = Collections.synchronizedMap(new HashMap<String, L3NetworkFactory>());
     private Map<String, IpAllocatorStrategy> ipAllocatorStrategies = Collections.synchronizedMap(new HashMap<String, IpAllocatorStrategy>());
+    private Set<String> notAccountMetaDatas = Collections.synchronizedSet(new HashSet<>());
 
     private static final Set<Class> allowedMessageAfterSoftDeletion = new HashSet<Class>();
 
@@ -171,6 +172,9 @@ public class L3NetworkManagerImpl extends AbstractService implements L3NetworkMa
             @Transactional(readOnly = true)
             public IpCapacity call() {
                 IpCapacity ret = new IpCapacity();
+                if (notAccountMetaDatas.isEmpty()) {
+                    notAccountMetaDatas.add(""); // Avoid NULL
+                }
 
                 if (msg.getIpRangeUuids() != null && !msg.getIpRangeUuids().isEmpty()) {
                     String sql = "select ipr.startIp, ipr.endIp from IpRangeVO ipr where ipr.uuid in (:uuids)";
@@ -179,9 +183,10 @@ public class L3NetworkManagerImpl extends AbstractService implements L3NetworkMa
                     List<Tuple> ts = q.getResultList();
                     ret.total = calcTotalIp(ts);
 
-                    sql = "select count(uip) from UsedIpVO uip where uip.ipRangeUuid in (:uuids)";
+                    sql = "select count(uip) from UsedIpVO uip where uip.ipRangeUuid in (:uuids) and (uip.metaData not in (:notAccountMetaData) or uip.metaData IS NULL)";
                     TypedQuery<Long> cq = dbf.getEntityManager().createQuery(sql, Long.class);
                     cq.setParameter("uuids", msg.getIpRangeUuids());
+                    cq.setParameter("notAccountMetaData", notAccountMetaDatas);
                     Long used = cq.getSingleResult();
                     ret.avail = ret.total - used;
                     return ret;
@@ -192,9 +197,10 @@ public class L3NetworkManagerImpl extends AbstractService implements L3NetworkMa
                     List<Tuple> ts = q.getResultList();
                     ret.total = calcTotalIp(ts);
 
-                    sql = "select count(uip) from UsedIpVO uip where uip.l3NetworkUuid in (:uuids)";
+                    sql = "select count(uip) from UsedIpVO uip where uip.l3NetworkUuid in (:uuids) and (uip.metaData not in (:notAccountMetaData) or uip.metaData IS NULL)";
                     TypedQuery<Long> cq = dbf.getEntityManager().createQuery(sql, Long.class);
                     cq.setParameter("uuids", msg.getL3NetworkUuids());
+                    cq.setParameter("notAccountMetaData", notAccountMetaDatas);
                     Long used = cq.getSingleResult();
                     ret.avail = ret.total - used;
                     return ret;
@@ -205,9 +211,10 @@ public class L3NetworkManagerImpl extends AbstractService implements L3NetworkMa
                     List<Tuple> ts = q.getResultList();
                     ret.total = calcTotalIp(ts);
 
-                    sql = "select count(uip) from UsedIpVO uip, L3NetworkVO l3, ZoneVO zone where uip.l3NetworkUuid = l3.uuid and l3.zoneUuid = zone.uuid and zone.uuid in (:uuids)";
+                    sql = "select count(uip) from UsedIpVO uip, L3NetworkVO l3, ZoneVO zone where uip.l3NetworkUuid = l3.uuid and l3.zoneUuid = zone.uuid and zone.uuid in (:uuids) and (uip.metaData not in (:notAccountMetaData) or uip.metaData IS NULL)";
                     TypedQuery<Long> cq = dbf.getEntityManager().createQuery(sql, Long.class);
                     cq.setParameter("uuids", msg.getZoneUuids());
+                    cq.setParameter("notAccountMetaData", notAccountMetaDatas);
                     Long used = cq.getSingleResult();
                     ret.avail = ret.total - used;
                     return ret;
@@ -354,6 +361,10 @@ public class L3NetworkManagerImpl extends AbstractService implements L3NetworkMa
             }
             ipAllocatorStrategies.put(f.getType().toString(), f);
         }
+
+        for (UsedIpNotAccountMetaDataExtensionPoint f : pluginRgty.getExtensionList(UsedIpNotAccountMetaDataExtensionPoint.class)) {
+            notAccountMetaDatas.add(f.usedIpNotAccountMetaData());
+        }
     }
 
     @Override
@@ -448,7 +459,7 @@ public class L3NetworkManagerImpl extends AbstractService implements L3NetworkMa
             @Override
             public List<Quota.QuotaUsage> getQuotaUsageByAccount(String accountUuid) {
                 Quota.QuotaUsage usage = new Quota.QuotaUsage();
-                usage.setName(L3NetworkConstant.QUOTA_L3_NUM);
+                usage.setName(QuotaConstant.L3_NUM);
                 usage.setUsed(getUsedL3(accountUuid));
                 return list(usage);
             }
@@ -466,13 +477,13 @@ public class L3NetworkManagerImpl extends AbstractService implements L3NetworkMa
             }
 
             private void check(APICreateL3NetworkMsg msg, Map<String, QuotaPair> pairs) {
-                long l3Num = pairs.get(L3NetworkConstant.QUOTA_L3_NUM).getValue();
+                long l3Num = pairs.get(QuotaConstant.L3_NUM).getValue();
                 long l3n = getUsedL3(msg.getSession().getAccountUuid());
 
                 if (l3n + 1 > l3Num) {
                     throw new ApiMessageInterceptionException(errf.instantiateErrorCode(IdentityErrors.QUOTA_EXCEEDING,
                             String.format("quota exceeding.  The account[uuid: %s] exceeds a quota[name: %s, value: %s]",
-                                    msg.getSession().getAccountUuid(), L3NetworkConstant.QUOTA_L3_NUM, l3Num)
+                                    msg.getSession().getAccountUuid(), QuotaConstant.L3_NUM, l3Num)
                     ));
                 }
             }
@@ -483,8 +494,8 @@ public class L3NetworkManagerImpl extends AbstractService implements L3NetworkMa
         quota.addMessageNeedValidation(APICreateL3NetworkMsg.class);
 
         QuotaPair p = new QuotaPair();
-        p.setName(L3NetworkConstant.QUOTA_L3_NUM);
-        p.setValue(QuotaConstant.QUOTA_L3_NUM);
+        p.setName(QuotaConstant.L3_NUM);
+        p.setValue(QuotaGlobalConfig.L3_NUM.defaultValue(Long.class));
         quota.addPair(p);
 
         return list(quota);

@@ -6,6 +6,7 @@ import org.zstack.utils.DebugUtils;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -22,12 +23,16 @@ public class While<T> {
     private final int ALL = 2;
     private final int STEP = 3;
 
+    private AtomicBoolean isOver = new AtomicBoolean(false);
+    private AtomicInteger doneCount = new AtomicInteger(0);
+
     public interface Do<T> {
         void accept(T item, WhileCompletion completion);
     }
 
     public While(Collection<T> items) {
         this.items = items;
+        doneCount.set(items.size());
     }
 
     public While each(Do<T> consumer) {
@@ -75,6 +80,10 @@ public class While<T> {
 
     public void run(NoErrorCompletion completion) {
         DebugUtils.Assert(consumer != null, "each() or all() or step() must be called before run()");
+        if (items.isEmpty()) {
+            completion.done();
+            return;
+        }
 
         if (mode == EACH) {
             run(items.iterator(), completion);
@@ -99,8 +108,7 @@ public class While<T> {
     private void runStep(Iterator<T> it, NoErrorCompletion completion) {
         T t;
         synchronized (it) {
-            if (!it.hasNext()) {
-                completion.done();
+            if (!it.hasNext() || isOver.get()) {
                 return;
             }
 
@@ -110,36 +118,40 @@ public class While<T> {
         consumer.accept(t, new WhileCompletion(completion) {
             @Override
             public void allDone() {
-                completion.done();
+                doneCompletion(completion);
             }
             @Override
             public void done() {
+                if (doneCount.decrementAndGet() == 0){
+                    doneCompletion(completion);
+                    return;
+                }
                 runStep(it, completion);
             }
         });
     }
 
     private void runAll(NoErrorCompletion completion) {
-        AtomicInteger count = new AtomicInteger(items.size());
-
-        if(count.intValue() == 0){
-            completion.done();
-            return;
-        }
         for (T t : items) {
             consumer.accept(t, new WhileCompletion(completion) {
                 @Override
                 public void allDone() {
-                    completion.done();
+                    doneCompletion(completion);
                 }
 
                 @Override
                 public void done() {
-                    if (count.decrementAndGet() == 0) {
-                        completion.done();
+                    if (doneCount.decrementAndGet() == 0) {
+                        doneCompletion(completion);
                     }
                 }
             });
+        }
+    }
+
+    private void doneCompletion(NoErrorCompletion completion){
+        if (isOver.compareAndSet(false, true)) {
+            completion.done();
         }
     }
 }

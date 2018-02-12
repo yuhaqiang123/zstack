@@ -11,7 +11,6 @@ import org.zstack.header.network.service.NetworkServiceL3NetworkRefInventory;
 import org.zstack.header.storage.primary.PrimaryStorageInventory;
 import org.zstack.header.vm.VmInstanceConstant.VmOperation;
 import org.zstack.header.volume.VolumeInventory;
-import org.zstack.utils.CollectionDSL;
 import org.zstack.utils.JsonWrapper;
 
 import java.io.Serializable;
@@ -167,10 +166,9 @@ public class VmInstanceSpec implements Serializable {
     private List<VolumeSpec> volumeSpecs = new ArrayList<>();
     private String requiredClusterUuid;
     private String requiredHostUuid;
+    private List<String> softAvoidHostUuids;
     private String requiredPrimaryStorageUuidForRootVolume;
     private String requiredPrimaryStorageUuidForDataVolume;
-    private List<String> excludePrimaryStorageTypeForRootVolume;
-    private List<String> excludePrimaryStorageTypeForDataVolume;
 
     private List<HostName> hostnames = new ArrayList<>();
     private HostInventory destHost;
@@ -190,36 +188,6 @@ public class VmInstanceSpec implements Serializable {
     private String VDIMonitorNumber = "1";
     private String consolePassword;
     private VmAccountPreference accountPerference;
-
-    public List<String> getExcludePrimaryStorageTypeForRootVolume() {
-        return excludePrimaryStorageTypeForRootVolume;
-    }
-
-    public void setExcludePrimaryStorageTypeForRootVolume(List<String> excludePrimaryStorageTypeForRootVolume) {
-        this.excludePrimaryStorageTypeForRootVolume = excludePrimaryStorageTypeForRootVolume;
-    }
-
-    public List<String> getExcludePrimaryStorageTypeForDataVolume() {
-        return excludePrimaryStorageTypeForDataVolume;
-    }
-
-    public void setExcludePrimaryStorageTypeForDataVolume(List<String> excludePrimaryStorageTypeForDataVolume) {
-        this.excludePrimaryStorageTypeForDataVolume = excludePrimaryStorageTypeForDataVolume;
-    }
-
-    public void addExcludePrimaryStorageUuidsForRootVolume(List<String> excludePrimaryStorageUuidsForRootVolume) {
-        if (this.excludePrimaryStorageTypeForRootVolume == null) {
-            this.excludePrimaryStorageTypeForRootVolume = CollectionDSL.list();
-        }
-        this.excludePrimaryStorageTypeForRootVolume.addAll(excludePrimaryStorageUuidsForRootVolume);
-    }
-
-    public void addExcludePrimaryStorageUuidsForDataVolume(List<String> excludePrimaryStorageTypeForDataVolume) {
-        if (this.excludePrimaryStorageTypeForDataVolume == null) {
-            this.excludePrimaryStorageTypeForDataVolume = CollectionDSL.list();
-        }
-        this.excludePrimaryStorageTypeForDataVolume.addAll(excludePrimaryStorageTypeForDataVolume);
-    }
 
     public String getVDIMonitorNumber() {
         return VDIMonitorNumber;
@@ -267,6 +235,14 @@ public class VmInstanceSpec implements Serializable {
 
     public void setRequiredHostUuid(String requiredHostUuid) {
         this.requiredHostUuid = requiredHostUuid;
+    }
+
+    public List<String> getSoftAvoidHostUuids() {
+        return softAvoidHostUuids;
+    }
+
+    public void setSoftAvoidHostUuids(List<String> softAvoidHostUuids) {
+        this.softAvoidHostUuids = softAvoidHostUuids;
     }
 
     public boolean isGcOnStopFailure() {

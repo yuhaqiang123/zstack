@@ -13,6 +13,8 @@ import org.zstack.header.rest.RESTFacade;
 import org.zstack.utils.ssh.Ssh;
 import org.zstack.utils.ssh.SshException;
 
+import java.util.concurrent.TimeUnit;
+
 import static org.zstack.core.Platform.operr;
 
 /**
@@ -47,14 +49,18 @@ public abstract class CephMonBase {
         Ssh ssh = new Ssh();
         try {
             ssh.setHostname(self.getHostname()).setUsername(self.getSshUsername()).setPassword(self.getSshPassword()).setPort(self.getSshPort())
-                    .checkTool("ceph", "rbd").runErrorByException();
+                    .checkTool("ceph", "rbd").setTimeout(5).runErrorByException();
         } catch (SshException e) {
             throw new OperationFailureException(operr("The problem may be caused by an incorrect user name or password or SSH port"));
         }
     }
 
     public <T> void httpCall(final String path, final Object cmd, final Class<T> retClass, final ReturnValueCompletion<T> completion) {
-        restf.asyncJsonPost(makeHttpPath(self.getHostname(), path), cmd, new JsonAsyncRESTCallback<T>(completion) {
+        httpCall(path, cmd, retClass, completion, null, 0);
+    }
+
+    public <T> void httpCall(final String path, final Object cmd, final Class<T> retClass, final ReturnValueCompletion<T> completion, TimeUnit unit, long timeout) {
+        JsonAsyncRESTCallback<T> callback = new JsonAsyncRESTCallback<T>(completion) {
             @Override
             public void fail(ErrorCode err) {
                 completion.fail(err);
@@ -69,7 +75,13 @@ public abstract class CephMonBase {
             public Class<T> getReturnClass() {
                 return retClass;
             }
-        });
+        };
+
+        if (unit == null) {
+            restf.asyncJsonPost(makeHttpPath(self.getHostname(), path), cmd, callback);
+        } else {
+            restf.asyncJsonPost(makeHttpPath(self.getHostname(), path), cmd, callback, unit, timeout);
+        }
     }
 
     private static class AgentResponse {

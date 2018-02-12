@@ -52,7 +52,9 @@ public class VmAllocateHostForStoppedVmFlow implements Flow {
         msg.setCpuCapacity(spec.getVmInventory().getCpuNum());
         msg.setMemoryCapacity(spec.getVmInventory().getMemorySize());
         msg.setVmOperation(spec.getCurrentVmOperation().toString());
-        msg.setImage(spec.getImageSpec().getInventory());
+        if (spec.getImageSpec() != null) {
+            msg.setImage(spec.getImageSpec().getInventory());
+        }
         if ((spec.getRequiredClusterUuid() != null &&
                 !spec.getRequiredClusterUuid().equals(msg.getVmInstance().getClusterUuid()))
                 || spec.getRequiredHostUuid() != null) {
@@ -71,6 +73,7 @@ public class VmAllocateHostForStoppedVmFlow implements Flow {
         msg.setRequiredPrimaryStorageUuid(spec.getVmInventory().getRootVolume().getPrimaryStorageUuid());
         msg.setServiceId(bus.makeLocalServiceId(HostAllocatorConstant.SERVICE_ID));
         msg.setAvoidHostUuids(getAvoidHost(spec));
+        msg.setSoftAvoidHostUuids(spec.getSoftAvoidHostUuids());
         amsg = msg;
 
         bus.send(amsg, new CloudBusCallBack(chain) {

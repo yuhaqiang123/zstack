@@ -74,7 +74,7 @@ public abstract class VmTracer {
         }
 
         private void handleStateChangeOnHostSide(final String vmUuid, final VmInstanceState actualState, VmInstanceState expected) {
-            VmStateChangedOnHostMsg msg = new VmStateChangedOnHostMsg(logger, "handleStateChangeOnHostSide send VmStateChangedOnHostMsg");
+            VmStateChangedOnHostMsg msg = new VmStateChangedOnHostMsg();
             msg.setVmStateAtTracingMoment(expected);
             msg.setVmInstanceUuid(vmUuid);
             msg.setStateOnHost(actualState);
@@ -106,14 +106,14 @@ public abstract class VmTracer {
             for (Map.Entry<String, VmInstanceState> e : mgmtSideStates.entrySet()) {
                 String vmUuid = e.getKey();
                 VmInstanceState expectedState = e.getValue();
-                if (expectedState != VmInstanceState.Stopped && !hostSideStates.containsKey(vmUuid)) {
+                if (expectedState != VmInstanceState.Stopped && expectedState != VmInstanceState.Created && !hostSideStates.containsKey(vmUuid)) {
                     handleMissingVm(vmUuid, expectedState);
                 }
             }
         }
 
         private void handleMissingVm(final String vmUuid, final VmInstanceState expectedState) {
-            VmStateChangedOnHostMsg msg = new VmStateChangedOnHostMsg(logger, "handleMissingVm send VmStateChangedOnHostMsg (vm: %s, host: %s, expect state %s, setState Stopped)");
+            VmStateChangedOnHostMsg msg = new VmStateChangedOnHostMsg();
             msg.setVmStateAtTracingMoment(expectedState);
             msg.setHostUuid(hostUuid);
             msg.setVmInstanceUuid(vmUuid);
@@ -131,7 +131,7 @@ public abstract class VmTracer {
 
     protected void reportVmState(final String hostUuid, final Map<String, VmInstanceState> vmStates) {
         for (Map.Entry<String, VmInstanceState> e : vmStates.entrySet()) {
-            logger.debug(String.format("reportVmState vm: %s, statte", e.getKey(), e.getValue().toString()));
+            logger.debug(String.format("reportVmState vm: %s, state: %s", e.getKey(), e.getValue().toString()));
         }
 
         for (VmInstanceState state : vmStates.values()) {

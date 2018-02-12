@@ -11,7 +11,7 @@ public class QueryEcsImageFromLocalAction extends QueryAction {
 
     public static class Result {
         public ErrorCode error;
-        public QueryEcsInstanceFromLocalResult value;
+        public QueryEcsImageFromLocalResult value;
 
         public Result throwExceptionIfError() {
             if (error != null) {
@@ -33,8 +33,8 @@ public class QueryEcsImageFromLocalAction extends QueryAction {
             return ret;
         }
         
-        QueryEcsInstanceFromLocalResult value = res.getResult(QueryEcsInstanceFromLocalResult.class);
-        ret.value = value == null ? new QueryEcsInstanceFromLocalResult() : value; 
+        QueryEcsImageFromLocalResult value = res.getResult(QueryEcsImageFromLocalResult.class);
+        ret.value = value == null ? new QueryEcsImageFromLocalResult() : value; 
 
         return ret;
     }
