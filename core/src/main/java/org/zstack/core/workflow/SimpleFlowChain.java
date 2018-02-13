@@ -59,6 +59,7 @@ public class SimpleFlowChain implements FlowTrigger, FlowRollback, FlowChain, Fl
     private List<List<Runnable>> afterFinal = new ArrayList<>();
 
     private boolean isFailCalled;
+    private Flow faildFlow;
 
     private static final Map<String, WorkFlowStatistic> statistics = new ConcurrentHashMap<>();
 
@@ -507,6 +508,7 @@ public class SimpleFlowChain implements FlowTrigger, FlowRollback, FlowChain, Fl
     @Override
     public void fail(ErrorCode errorCode) {
         isFailCalled = true;
+        faildFlow = currentFlow;
         setErrorCode(errorCode);
         rollBackFlows.push(currentFlow);
         rollback();
@@ -621,6 +623,15 @@ public class SimpleFlowChain implements FlowTrigger, FlowRollback, FlowChain, Fl
     public FlowChain allowEmptyFlow() {
         allowEmptyFlow = true;
         return this;
+    }
+    
+    @Override
+    public boolean faildOnThis(Flow flow) {
+        if (faildFlow == flow) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     private void setErrorCode(ErrorCode errorCode) {
