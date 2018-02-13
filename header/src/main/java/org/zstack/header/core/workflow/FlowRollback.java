@@ -9,4 +9,6 @@ public interface FlowRollback extends AsyncBackup {
     void rollback();
 
     void skipRestRollbacks();
+    
+    boolean faildOnThis(Flow flow);
 }
